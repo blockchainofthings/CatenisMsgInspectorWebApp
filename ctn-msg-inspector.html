@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Catenis Message Inspector</title>
+
+    <!-- Catenis message inspector -->
+    <script src="https://unpkg.com/catenis-msg-inspector"></script>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+    <!-- Bootstrap scripts: JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="assets/style/msg-inspector.css">
+</head>
+<body style="background-color:#f5fff7">
+<header class="p-2 p-lg-3" style="background-color:#353A94">
+    <div class="container m-0 text-left">
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col">
+                <p class="h3 text-white mb-0" style="font-family:Myriadpro-Bold">
+                    <img src="assets/img/CompanyElement_SM_Darkbackgrounds.png" alt="Catenis logo" style="width:3rem;height:auto">&nbsp;&nbsp;Catenis <span style="color:lightgray">Enterprise</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</header>
+<div class="container mt-2">
+    <div class="row mb-4">
+        <div class="col text-center text-muted">
+            <p class="h2">Catenis Message Inspector</p>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-1"></div>
+        <div class="col text-center">
+            <form onsubmit="inspectMessage();return false">
+                <div class="form-group">
+                    <div class="input-group">
+                        <input id="txidInFld" type="text" class="form-control" placeholder="Transaction ID">
+                        <div class="input-group-append">
+                            <button class="btn btn-secondary" type="submit" aria-label="Inspect">
+                                <svg class="bi bi-search text-white" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M10.442 10.442a1 1 0 0 1 1.415 0l3.85 3.85a1 1 0 0 1-1.414 1.415l-3.85-3.85a1 1 0 0 1 0-1.415z"/>
+                                    <path fill-rule="evenodd" d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 6.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <input id="ocCidInFld" type="text" class="form-control" placeholder="Off-Chain CID">
+                        <div class="input-group-append">
+                            <button class="btn btn-secondary" type="submit" aria-label="Inspect">
+                                <svg class="bi bi-search text-white" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M10.442 10.442a1 1 0 0 1 1.415 0l3.85 3.85a1 1 0 0 1-1.414 1.415l-3.85-3.85a1 1 0 0 1 0-1.415z"/>
+                                    <path fill-rule="evenodd" d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 6.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+    <div id="ldMsgSpinnerSec" class="row" hidden>
+        <div class="col text-center text-secondary">
+            <div class="spinner-border" style="width:3rem;height:3rem;border-width:0.5em" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    </div>
+    <div id="errMsgSec" class="row" hidden>
+        <div class="col text-center">
+            <div class="alert alert-danger" role="alert">
+                <span id="errMsgFld"></span>
+                <button type="button" class="close" aria-label="Close" onclick="hideError()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="msgInspectionSec" class="p-3" style="background-color:white" hidden>
+        <div id="ctxCtnMsgTxSec">
+            <div class="row" style="margin-top:1rem; margin-bottom:0.5rem">
+                <div class="col">
+                    <p class="h5">Catenis Message Transaction</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Tx ID</label>
+                </div>
+                <div class="col-md text-muted text-break text-monospace">
+                    <p id="ctxTxIdFld"></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Embedded data</label>
+                </div>
+            </div>
+            <div class="row" style="padding-left:0.75rem">
+                <div class="col-md-4">
+                    <label>Hex</label>
+                </div>
+                <div class="col-md text-muted text-break text-monospace">
+                    <p id="ctxEmbDataHexFld"></p>
+                </div>
+            </div>
+            <div class="row" style="padding-left:0.75rem">
+                <div class="col-md-4">
+                    <label>Payload</label>
+                </div>
+            </div>
+            <div id="ctxEmbDataEmbMsgSec">
+                <div class="row" style="padding-left:1.5rem">
+                    <div class="col-md-4">
+                        <label>Message contents</label>
+                    </div>
+                    <div class="col-md text-muted text-break text-monospace">
+                        <p id="ctxMsgContHexFld"></p>
+                        <p id="ctxMsgContStrFld"></p>
+                    </div>
+                </div>
+            </div>
+            <div id="ctxEmbDataExtMsgSec">
+                <div class="row" style="padding-left:1.5rem">
+                    <div class="col-md-4">
+                        <label>Storage provider</label>
+                    </div>
+                    <div class="col-md text-muted text-break">
+                        <p id="ctxExtMsgStoProvFld"></p>
+                    </div>
+                </div>
+                <div class="row" style="padding-left:1.5rem">
+                    <div class="col-md-4">
+                        <label>Message reference</label>
+                    </div>
+                    <div class="col-md text-muted text-break text-monospace">
+                        <p id="ctxExtMsgRefHexFld"></p>
+                        <p id="ctxExtMsgRefStrFld"></p>
+                    </div>
+                </div>
+            </div>
+            <div id="ctxEmbDataOffChainSec">
+                <div class="row" style="padding-left:1.5rem">
+                    <div class="col-md-4">
+                        <label>Batch document CID</label>
+                    </div>
+                    <div class="col-md text-muted text-break text-monospace">
+                        <p id="ctxBatchDocCidHexFld"></p>
+                        <p id="ctxBatchDocCidStrFld"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Tx type</label>
+                </div>
+                <div class="col-md text-muted text-break text-capitalize">
+                    <p id="ctxTxTypeFld"></p>
+                </div>
+            </div>
+            <div id="ctxMessageSec">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label>Message type</label>
+                    </div>
+                    <div class="col-md text-muted text-break text-capitalize">
+                        <p id="ctxMsgTypeFld"></p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label>Origin device</label>
+                    </div>
+                </div>
+                <div class="row" style="padding-left:0.75rem">
+                    <div class="col-md-4">
+                        <label>Address</label>
+                    </div>
+                    <div class="col-md text-muted text-break text-monospace">
+                        <p id="ctxOrgDevAddrFld"></p>
+                    </div>
+                </div>
+                <div class="row" style="padding-left:0.75rem">
+                    <div class="col-md-4">
+                        <label>Public key hash</label>
+                    </div>
+                    <div class="col-md text-muted text-break text-monospace">
+                        <p id="ctxOrgDevPkhFld"></p>
+                    </div>
+                </div>
+                <div id="ctxTrgDevSec">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>Target device</label>
+                        </div>
+                    </div>
+                    <div class="row" style="padding-left:0.75rem">
+                        <div class="col-md-4">
+                            <label>Address</label>
+                        </div>
+                        <div class="col-md text-muted text-break text-monospace">
+                            <p id="ctxTrgDevAddrFld"></p>
+                        </div>
+                    </div>
+                    <div class="row" style="padding-left:0.75rem">
+                        <div class="col-md-4">
+                            <label>Public key hash</label>
+                        </div>
+                        <div class="col-md text-muted text-break text-monospace">
+                            <p id="ctxTrgDevPkhFld"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label>Message options</label>
+                    </div>
+                </div>
+                <div class="row" style="padding-left:0.75rem">
+                    <div class="col-md-4">
+                        <label>Embedding</label>
+                    </div>
+                    <div class="col-md text-muted">
+                        <p id="ctxMsgOptEmbFld">
+                            <svg class="bi bi-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M14 1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                            </svg>
+                            <svg class="bi bi-check-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M14 1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                                <path fill-rule="evenodd" d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.236.236 0 0 1 .02-.022z"/>
+                            </svg>
+                        </p>
+                    </div>
+                </div>
+                <div class="row" style="padding-left:0.75rem">
+                    <div class="col-md-4">
+                        <label>Encryption</label>
+                    </div>
+                    <div class="col-md text-muted">
+                        <p id="ctxMsgOptEncFld">
+                            <svg class="bi bi-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M14 1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                            </svg>
+                            <svg class="bi bi-check-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M14 1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                                <path fill-rule="evenodd" d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.236.236 0 0 1 .02-.022z"/>
+                            </svg>
+                        </p>
+                    </div>
+                </div>
+                <div id="ctxMsgOptRdConfSec">
+                    <div class="row" style="padding-left:0.75rem">
+                        <div class="col-md-4">
+                            <label>Read confirmation</label>
+                        </div>
+                        <div class="col-md text-muted">
+                            <p id="ctxMsgOptRdConfFld">
+                                <svg class="bi bi-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M14 1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                                </svg>
+                                <svg class="bi bi-check-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M14 1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                                    <path fill-rule="evenodd" d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.236.236 0 0 1 .02-.022z"/>
+                                </svg>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="docBatchDocumentSec">
+            <div class="row" style="margin-top:1rem; margin-bottom:0.5rem">
+                <div class="col">
+                    <p class="h5">Batch Document</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>CID</label>
+                </div>
+                <div class="col-md text-muted text-break text-monospace">
+                    <p id="docCidFld"></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Off-Chain message CIDs</label>
+                </div>
+                <div class="col-md text-muted text-break text-monospace">
+                    <p id="docOCMsgCidsFld"></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Merkle root</label>
+                </div>
+                <div class="col-md text-muted text-break text-monospace">
+                    <p id="docMerkleRootFld"></p>
+                </div>
+            </div>
+        </div>
+        <div id="envOCMsgEnvelopeSec">
+            <div class="row" style="margin-top:1rem; margin-bottom:0.5rem">
+                <div class="col">
+                    <p class="h5">Off-Chain Message Envelope</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>CID</label>
+                </div>
+                <div class="col-md text-muted text-break text-monospace">
+                    <p id="envCidFld"></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Time</label>
+                </div>
+                <div class="col-md text-muted text-break">
+                    <p id="envTimeFld"></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Storage provider</label>
+                </div>
+                <div class="col-md text-muted text-break">
+                    <p id="envExtMsgStoProvFld"></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Message reference</label>
+                </div>
+                <div class="col-md text-muted text-break text-monospace">
+                    <p id="envExtMsgRefHexFld"></p>
+                    <p id="envExtMsgRefStrFld"></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Message type</label>
+                </div>
+                <div class="col-md text-muted text-break text-capitalize">
+                    <p id="envMsgTypeFld"></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Origin device</label>
+                </div>
+            </div>
+            <div class="row" style="padding-left:0.75rem">
+                <div class="col-md-4">
+                    <label>Public key hash</label>
+                </div>
+                <div class="col-md text-muted text-break text-monospace">
+                    <p id="envOrgDevPkhFld"></p>
+                </div>
+            </div>
+            <div id="envTrgDevSec">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label>Target device</label>
+                    </div>
+                </div>
+                <div class="row" style="padding-left:0.75rem">
+                    <div class="col-md-4">
+                        <label>Public key hash</label>
+                    </div>
+                    <div class="col-md text-muted text-break text-monospace">
+                        <p id="envTrgDevPkhFld"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Message options</label>
+                </div>
+            </div>
+            <div class="row" style="padding-left:0.75rem">
+                <div class="col-md-4">
+                    <label>Encryption</label>
+                </div>
+                <div class="col-md text-muted">
+                    <p id="envMsgOptEncFld">
+                        <svg class="bi bi-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M14 1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                        </svg>
+                        <svg class="bi bi-check-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M14 1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                            <path fill-rule="evenodd" d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.236.236 0 0 1 .02-.022z"/>
+                        </svg>
+                    </p>
+                </div>
+            </div>
+            <div id="envMsgOptRdConfSec">
+                <div class="row" style="padding-left:0.75rem">
+                    <div class="col-md-4">
+                        <label>Read confirmation</label>
+                    </div>
+                    <div class="col-md text-muted">
+                        <p id="envMsgOptRdConfFld">
+                            <svg class="bi bi-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M14 1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                            </svg>
+                            <svg class="bi bi-check-square" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M14 1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                                <path fill-rule="evenodd" d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.236.236 0 0 1 .02-.022z"/>
+                            </svg>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="msgMessageSec">
+            <div class="row" style="margin-top:1rem; margin-bottom:0.5rem">
+                <div class="col">
+                    <p class="h5">Message</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>CID</label>
+                </div>
+                <div class="col-md text-muted text-break text-monospace">
+                    <p id="msgCidFld"></p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Contents</label>
+                </div>
+                <div class="col-md text-muted text-break text-monospace">
+                    <p>
+                        <span id="msgContHexFld"></span><span id="msgContStrFld"></span><span id="msgMsgExcerptEnd" style="color:lightgray">...</span>
+                    </p>
+                    <p style="margin-top:-1rem">
+                        <a class="btn-link small" href="#" style="margin-right:2em" role="button" onclick="changeMsgDisplayMode();return false">Display <span id="msgDispModeText">in hex</span></a>
+                        <a id="msgShowRemainLink" class="btn-link small" href="#" role="button" onclick="showRemainingMsg();return false">Show remaining <span id="msgRemainMsgLen">xxx</span> bytes</a>
+                        <a id="msgShowExcerptLink" class="btn-link small" href="#" role="button" onclick="showMsgExcerpt();return false">Show excerpt only</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function hideElem(sel) {
+        const $el = $(sel)[0];
+        if ($el) {
+            $el.setAttribute('hidden', '');
+        }
+    }
+    function showElem(sel) {
+        $(sel).removeAttr('hidden');
+    }
+    function elemContent(sel, val) {
+        const $el = $(sel)[0];
+        if ($el) {
+            if (val) {
+                $el.innerText = val;
+            }
+            else {
+                return $el.innerText;
+            }
+        }
+    }
+    function showOption(fldName, checked) {
+        if (checked) {
+            hideElem($(`#${fldName} > svg.bi-square`));
+            showElem($(`#${fldName} > svg.bi-check-square`));
+        }
+        else {
+            hideElem($(`#${fldName} > svg.bi-check-square`));
+            showElem($(`#${fldName} > svg.bi-square`));
+        }
+    }
+    function showError(err) {
+        elemContent('#errMsgFld', err.message);
+        showElem('#errMsgSec');
+    }
+    function hideError(err) {
+        hideElem('#errMsgSec');
+        elemContent('#errMsgFld', '');
+    }
+
+    const msgInspector = new ctnMsgInspector.MessageInspector({network:'testnet'});
+    const msgConst = {
+        maxExcerptLength: 1024,
+        minRemainBytes: 10
+    };
+    const msgInfo = {
+        displayMode: 'string',
+        remainBytes: 0,
+        showExcerpt: false
+    };
+    const docConst = {
+        maxOCMsgCids: 30
+    };
+
+    function inspectMessage() {
+        hideError();
+        hideElem('#msgInspectionSec');
+        showElem('#ldMsgSpinnerSec');
+
+        const txid = $('#txidInFld').val();
+        const offChainCid = $('#ocCidInFld').val();
+
+        msgInspector.inspectMessage(txid, offChainCid, (err) => {
+            hideElem('#ldMsgSpinnerSec');
+
+            if (err) {
+                showError(err);
+            }
+            else {
+                processCtnMsgTx();
+                processBatchDocument();
+                processOCMsgEnvelope();
+                processMessage();
+
+                showElem('#msgInspectionSec');
+            }
+        });
+    }
+    function processCtnMsgTx() {
+        if (msgInspector.txData) {
+            elemContent('#ctxTxIdFld', msgInspector.txid);
+            elemContent('#ctxEmbDataHexFld', msgInspector.txData.buffer.toString('hex'));
+
+            if (msgInspector.txType.name === 'settleOffChainMessages') {
+                hideElem('#ctxEmbDataEmbMsgSec');
+                hideElem('#ctxEmbDataExtMsgSec');
+
+                elemContent('#ctxBatchDocCidHexFld', msgInspector.batchDocCid.buffer.toString('hex'));
+                elemContent('#ctxBatchDocCidStrFld', msgInspector.batchDocCid.toString());
+                showElem('#ctxEmbDataOffChainSec');
+            }
+            else if (msgInspector.msgOptions.embedding) {
+                hideElem('#ctxEmbDataExtMsgSec');
+                hideElem('#ctxEmbDataOffChainSec');
+
+                elemContent('#ctxMsgContHexFld', msgInspector.message.toString('hex'));
+                elemContent('#ctxMsgContStrFld', msgInspector.message.toString());
+
+                showElem('#ctxEmbDataEmbMsgSec');
+            }
+            else {
+                hideElem('#ctxEmbDataEmbMsgSec');
+                hideElem('#ctxEmbDataOffChainSec');
+
+                elemContent('#ctxExtMsgStoProvFld', msgInspector.storageProvider.description);
+                elemContent('#ctxExtMsgRefHexFld', msgInspector.messageRef.buffer.toString('hex'));
+                elemContent('#ctxExtMsgRefStrFld', msgInspector.messageRef.toString());
+
+                showElem('#ctxEmbDataExtMsgSec');
+            }
+
+            elemContent('#ctxTxTypeFld', msgInspector.txType.description);
+
+            if (msgInspector.txType.name !== 'settleOffChainMessages') {
+                elemContent('#ctxMsgTypeFld', msgInspector.msgType.description);
+                elemContent('#ctxOrgDevAddrFld', msgInspector.originDevice.address);
+                elemContent('#ctxOrgDevPkhFld', msgInspector.originDevice.pubKeyHash.toString('hex'));
+
+                if (msgInspector.txType.name === 'sendMessage') {
+                    elemContent('#ctxTrgDevAddrFld', msgInspector.targetDevice.address);
+                    elemContent('#ctxTrgDevPkhFld', msgInspector.targetDevice.pubKeyHash.toString('hex'));
+
+                    showElem('#ctxTrgDevSec');
+                }
+                else {
+                    hideElem('#ctxTrgDevSec');
+                }
+
+                showOption('ctxMsgOptEmbFld', msgInspector.msgOptions.embedding);
+                showOption('ctxMsgOptEncFld', msgInspector.msgOptions.encryption);
+
+                if ('readConfirmation' in msgInspector.msgOptions) {
+                    showOption('ctxMsgOptRdConfFld', msgInspector.msgOptions.readConfirmation);
+
+                    showElem('#ctxMsgOptRdConfSec');
+                }
+                else {
+                    hideElem('#ctxMsgOptRdConfSec');
+                }
+
+                showElem('#ctxMessageSec');
+            }
+            else {
+                hideElem('#ctxMessageSec');
+            }
+
+            showElem('#ctxCtnMsgTxSec');
+        }
+        else {
+            hideElem('#ctxCtnMsgTxSec');
+        }
+    }
+    function processBatchDocument() {
+        if (msgInspector.batchDoc) {
+            elemContent('#docCidFld', msgInspector.batchDocCid.toString());
+
+            let strOffChainCid;
+
+            if (msgInspector.offChainCid) {
+                strOffChainCid = msgInspector.offChainCid.toString();
+            }
+
+            $('#docOCMsgCidsFld').html(listToDisplay(reduceList(msgInspector.batchDoc.doc.msgData, docConst.maxOCMsgCids, strOffChainCid), strOffChainCid));
+            elemContent('#docMerkleRootFld', msgInspector.batchDoc.merkleRoot.toString('hex'));
+
+            showElem('#docBatchDocumentSec');
+        }
+        else {
+            hideElem('#docBatchDocumentSec');
+        }
+    }
+    function reduceList(list, maxItens, importantItem) {
+        const importantItemIdx = importantItem ? list.findIndex(item => item === importantItem) : -1;
+        let itemsToAdd = Math.min(list.length, maxItens);
+        const reducedList = list.slice(0, itemsToAdd);
+
+        let lastIdx;
+
+        if (importantItemIdx >= itemsToAdd) {
+            if (importantItemIdx > itemsToAdd) {
+                reducedList.splice(itemsToAdd - 1, 1, null, importantItem);
+            }
+            else {
+                reducedList.splice(itemsToAdd, 0, importantItem);
+            }
+
+            lastIdx = importantItemIdx;
+        }
+        else {
+            lastIdx = itemsToAdd - 1;
+        }
+
+        if (lastIdx < list.length - 1) {
+            if (list.length - lastIdx > 2) {
+                reducedList.push(null);
+            }
+            else {
+                reducedList.push(list[list.length - 1]);
+            }
+        }
+
+        return reducedList;
+    }
+    function listToDisplay(list, item2Highlight) {
+        return list.reduce((html, item) => {
+            if (html.length > 0) {
+                html += '<br>';
+            }
+
+            if (item === null) {
+                item = `<span style="color:lightgray">...</span>`;
+            }
+
+            if (item2Highlight && item === item2Highlight) {
+                item = `<b>${item}</b>`;
+            }
+
+            return html + item + '\n';
+        }, '');
+    }
+    function processOCMsgEnvelope() {
+        if (msgInspector.offChainMsgEnvelope) {
+            elemContent('#envCidFld', msgInspector.offChainCid.toString());
+            elemContent('#envTimeFld', new Date(msgInspector.offChainMsgEnvelope.timestamp));
+
+            elemContent('#envExtMsgStoProvFld', msgInspector.storageProvider.description);
+            elemContent('#envExtMsgRefHexFld', msgInspector.messageRef.buffer.toString('hex'));
+            elemContent('#envExtMsgRefStrFld', msgInspector.messageRef.toString());
+
+            elemContent('#envMsgTypeFld', msgInspector.msgType.description);
+            elemContent('#envOrgDevPkhFld', msgInspector.originDevice.pubKeyHash.toString('hex'));
+
+            if (msgInspector.msgType.name === 'sendOffChainMessage') {
+                elemContent('#envTrgDevPkhFld', msgInspector.targetDevice.pubKeyHash.toString('hex'));
+
+                showElem('#envTrgDevSec');
+            }
+            else {
+                hideElem('#envTrgDevSec');
+            }
+
+            showOption('envMsgOptEncFld', msgInspector.msgOptions.encryption);
+
+            if ('readConfirmation' in msgInspector.msgOptions) {
+                showOption('envMsgOptRdConfFld', msgInspector.msgOptions.readConfirmation);
+
+                showElem('#envMsgOptRdConfSec');
+            }
+            else {
+                hideElem('#envMsgOptRdConfSec');
+            }
+
+            showElem('#envOCMsgEnvelopeSec');
+        }
+        else {
+            hideElem('#envOCMsgEnvelopeSec');
+        }
+    }
+    function processMessage() {
+        if ((msgInspector.txData && msgInspector.txType.name !== 'settleOffChainMessages' && !msgInspector.msgOptions.embedding)
+                || (msgInspector.offChainCid)) {
+            elemContent('#msgCidFld', msgInspector.messageRef.toString());
+
+            analyseMessage();
+            displayMessage();
+
+            showElem('#msgMessageSec');
+        }
+        else {
+            hideElem('#msgMessageSec');
+        }
+    }
+    function changeMsgDisplayMode() {
+        msgInfo.displayMode = msgInfo.displayMode === 'string' ? 'hex' : 'string';
+        displayMessage();
+    }
+    function showRemainingMsg() {
+        msgInfo.showExcerpt = false;
+        displayMessage();
+    }
+    function showMsgExcerpt() {
+        msgInfo.showExcerpt = true;
+        displayMessage();
+    }
+    function analyseMessage() {
+        msgInfo.remainBytes = msgInspector.message.length >= msgConst.maxExcerptLength + msgConst.minRemainBytes
+            ? msgInspector.message.length - msgConst.maxExcerptLength : 0;
+        msgInfo.showExcerpt = !!msgInfo.remainBytes;
+        msgInfo.displayMode = 'string';
+    }
+    function displayMessage() {
+        if (msgInfo.displayMode === 'string') {
+            hideElem('#msgContHexFld');
+            elemContent('#msgContHexFld', '');
+
+            let msgEnd;
+
+            if (msgInfo.showExcerpt) {
+                msgEnd = msgConst.maxExcerptLength;
+                showElem('#msgMsgExcerptEnd');
+            }
+            else {
+                hideElem('#msgMsgExcerptEnd');
+            }
+
+            elemContent('#msgContStrFld', msgInspector.message.toString('utf8', 0, msgEnd));
+            showElem('#msgContStrFld');
+
+            elemContent('#msgDispModeText', 'in hex');
+
+            if (!msgInfo.remainBytes) {
+                hideElem('#msgShowExcerptLink');
+                hideElem('#msgShowRemainLink');
+            }
+            else if (msgInfo.showExcerpt) {
+                hideElem('#msgShowExcerptLink');
+                elemContent('#msgRemainMsgLen', msgInfo.remainBytes.toLocaleString());
+                showElem('#msgShowRemainLink');
+            }
+            else {
+                showElem('#msgShowExcerptLink');
+                hideElem('#msgShowRemainLink');
+            }
+        }
+        else {
+            hideElem('#msgContStrFld');
+            elemContent('#msgContStrFld', '');
+
+            let msgEnd;
+
+            if (msgInfo.showExcerpt) {
+                msgEnd = msgConst.maxExcerptLength;
+                showElem('#msgMsgExcerptEnd');
+            }
+            else {
+                hideElem('#msgMsgExcerptEnd');
+            }
+
+            elemContent('#msgContHexFld', msgInspector.message.toString('hex', 0, msgEnd));
+            showElem('#msgContHexFld');
+
+            elemContent('#msgDispModeText', 'as string');
+
+            if (!msgInfo.remainBytes) {
+                hideElem('#msgShowExcerptLink');
+                hideElem('#msgShowRemainLink');
+            }
+            else if (msgInfo.showExcerpt) {
+                hideElem('#msgShowExcerptLink');
+                elemContent('#msgRemainMsgLen', msgInfo.remainBytes.toLocaleString());
+                showElem('#msgShowRemainLink');
+            }
+            else {
+                showElem('#msgShowExcerptLink');
+                hideElem('#msgShowRemainLink');
+            }
+        }
+    }
+</script>
+</body>
+</html>
