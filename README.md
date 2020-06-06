@@ -8,9 +8,23 @@ This web application has been designed as a single HTML page, making use of [Boo
  [catenis-msg-inspector](https://github.com/blockchainofthings/catenis-msg-inspector) JavaScript library to actually
  perform the inspection of the Catenis message.
 
+### Browser compatibility
+
+The web application's HTML page is compatible with modern web browsers.
+
+It has been tested on the following web browsers:
+
+- Safari ver. 13.1 (on macOS Catalina 10.15)
+- Google Chrome ver. 83.0 64 bits (on macOS Catalina 10.15, Windows 10)
+- Google Chrome ver. 83.0 32 bits (on Windows 8.1)
+- Firefox ver. 76.0 64-bits (on macOS Catalina 10.15)
+- Microsoft Edge ver. 44 (on Windows 10)
+
+> **Note**: Internet Explorer is **not** supported.
+
 ## Deployment
 
-To deploy it, just copy the `ctn-msg-inspector.html` HTML page along with the `assets` directory and its contents to a
+To deploy this web application, just copy the `ctn-msg-inspector.html` HTML page along with the `assets` directory and its contents to a
  web server.
 
 ## Usage
