@@ -41,7 +41,7 @@ The value of the `blockchain.txid` property of the returned message container in
 
 ### Inspecting standard Catenis messages
 
-To inspect standard Catenis message, only the `Transaction ID` should be provided.
+To inspect standard Catenis messages, only the `Transaction ID` should be provided.
 
 ### Inspecting off-chain Catenis messages
 
@@ -54,6 +54,6 @@ In contrast, when the `Off-Chain CID` is provided, the inspection will reveal in
 
 ## License
 
-This we application is released under the [MIT License](LICENSE). Feel free to fork, and modify!
+This web application is released under the [MIT License](LICENSE). Feel free to fork, and modify!
 
 Copyright © 2020, Blockchain of Things Inc.
