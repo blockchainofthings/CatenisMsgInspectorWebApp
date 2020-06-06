@@ -720,7 +720,7 @@
     }
     function processMessage() {
         if ((msgInspector.txData && msgInspector.txType.name !== 'settleOffChainMessages' && !msgInspector.msgOptions.embedding)
-                || (msgInspector.offChainCid)) {
+                || (msgInspector.offChainMsgEnvelope)) {
             elemContent('#msgCidFld', msgInspector.messageRef.toString());
 
             analyseMessage();
