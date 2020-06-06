@@ -302,6 +302,10 @@
                 </div>
                 <div class="col-md text-muted text-break text-monospace">
                     <p id="docOCMsgCidsFld"></p>
+                    <p id="docShowListLinksSec" style="margin-top:-1rem">
+                        <a id="docShowWholeListLink" class="btn-link small" href="#" role="button" onclick="showAllOCMsgCids();return false">Show whole list</a>
+                        <a id="docShowPartialListLink" class="btn-link small" href="#" role="button" onclick="showPartialOCMsgCids();return false">Show partial list</a>
+                    </p>
                 </div>
             </div>
             <div class="row">
@@ -513,6 +517,11 @@
     const docConst = {
         maxOCMsgCids: 30
     };
+    const docInfo = {
+        strOffChainCid: undefined,
+        reducedList: undefined,
+        showReduced: false
+    };
 
     function inspectMessage() {
         hideError();
@@ -616,13 +625,14 @@
         if (msgInspector.batchDoc) {
             elemContent('#docCidFld', msgInspector.batchDocCid.toString());
 
-            let strOffChainCid;
+            docInfo.strOffChainCid = msgInspector.offChainCid ? msgInspector.offChainCid.toString() : undefined;
 
-            if (msgInspector.offChainCid) {
-                strOffChainCid = msgInspector.offChainCid.toString();
-            }
+            const {list, isReduced} = reduceList(msgInspector.batchDoc.doc.msgData, docConst.maxOCMsgCids, docInfo.strOffChainCid);
+            docInfo.reducedList = isReduced ? list : undefined;
+            docInfo.showReduced = !!docInfo.reducedList;
 
-            $('#docOCMsgCidsFld').html(listToDisplay(reduceList(msgInspector.batchDoc.doc.msgData, docConst.maxOCMsgCids, strOffChainCid), strOffChainCid));
+            displayOCMsgCids();
+
             elemContent('#docMerkleRootFld', msgInspector.batchDoc.merkleRoot.toString('hex'));
 
             showElem('#docBatchDocumentSec');
@@ -634,16 +644,18 @@
     function reduceList(list, maxItens, importantItem) {
         const importantItemIdx = importantItem ? list.findIndex(item => item === importantItem) : -1;
         let itemsToAdd = Math.min(list.length, maxItens);
-        const reducedList = list.slice(0, itemsToAdd);
+        const resultList = list.slice(0, itemsToAdd);
+        let isReduced = false;
 
         let lastIdx;
 
         if (importantItemIdx >= itemsToAdd) {
             if (importantItemIdx > itemsToAdd) {
-                reducedList.splice(itemsToAdd - 1, 1, null, importantItem);
+                resultList.splice(itemsToAdd - 1, 1, null, importantItem);
+                isReduced = true;
             }
             else {
-                reducedList.splice(itemsToAdd, 0, importantItem);
+                resultList.splice(itemsToAdd, 0, importantItem);
             }
 
             lastIdx = importantItemIdx;
@@ -654,14 +666,18 @@
 
         if (lastIdx < list.length - 1) {
             if (list.length - lastIdx > 2) {
-                reducedList.push(null);
+                resultList.push(null);
+                isReduced = true;
             }
             else {
-                reducedList.push(list[list.length - 1]);
+                resultList.push(list[list.length - 1]);
             }
         }
 
-        return reducedList;
+        return {
+            list: resultList,
+            isReduced
+        };
     }
     function listToDisplay(list, item2Highlight) {
         return list.reduce((html, item) => {
@@ -679,6 +695,35 @@
 
             return html + item + '\n';
         }, '');
+    }
+    function displayOCMsgCids() {
+        const list = docInfo.reducedList && docInfo.showReduced ? docInfo.reducedList : msgInspector.batchDoc.doc.msgData;
+
+        $('#docOCMsgCidsFld').html(listToDisplay(list, docInfo.strOffChainCid));
+
+        if (docInfo.reducedList) {
+            if (docInfo.showReduced) {
+                showElem('#docShowWholeListLink');
+                hideElem('#docShowPartialListLink');
+            }
+            else {
+                hideElem('#docShowWholeListLink');
+                showElem('#docShowPartialListLink');
+            }
+
+            showElem('#docShowListLinksSec');
+        }
+        else {
+            hideElem('#docShowListLinksSec');
+        }
+    }
+    function showAllOCMsgCids() {
+        docInfo.showReduced = false;
+        displayOCMsgCids();
+    }
+    function showPartialOCMsgCids() {
+        docInfo.showReduced = true;
+        displayOCMsgCids();
     }
     function processOCMsgEnvelope() {
         if (msgInspector.offChainMsgEnvelope) {
