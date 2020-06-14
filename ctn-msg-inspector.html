@@ -18,6 +18,13 @@
     <link rel="stylesheet" href="assets/style/msg-inspector.css">
 </head>
 <body style="background-color:#f5fff7">
+<div id="envHeaderSec" class="container text-center m-0" style="background-color:#66cc33;max-width:100%" hidden>
+    <div class="row">
+        <div class="col text-white">
+            <p id="envNameFld" class="text-capitalize m-0"></p>
+        </div>
+    </div>
+</div>
 <div class="container p-2 p-lg-3 m-0" style="background-color:#353A94;max-width:100%">
     <div class="row">
         <div class="col-md-1"></div>
@@ -907,6 +914,28 @@
             }
         }
     }
+
+    function showHeader() {
+        const subDomain = getSubDomain();
+
+        if (subDomain) {
+            let envName;
+
+            if (subDomain === 'sandbox') {
+                envName = 'sandbox';
+            }
+
+            elemContent('#envNameFld', envName);
+            showElem('#envHeaderSec');
+        }
+    }
+    function getSubDomain() {
+        const match = /^[^\.:]+(?=\.)/.exec(window.location.host);
+
+        return match ? match[0] : undefined;
+    }
+
+    showHeader();
 </script>
 </body>
 </html>
